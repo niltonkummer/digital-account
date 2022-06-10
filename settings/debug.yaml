@@ -1,0 +1,9 @@
+---
+db:
+  name: "./db/data.sqlite"
+container:
+  port: ":80"
+auth:
+  timeout: "1h"
+  key: "secret"
+  realm: "domain jwt"
