@@ -90,6 +90,13 @@ func Run() {
 	if err != nil {
 		log.Fatal("could not load settings: ", err)
 	}
+
+	// HEROKU CONFIG
+	port := os.Getenv("PORT")
+	if port != "" {
+		settings.Set("container.port", ":"+port)
+	}
+
 	app = &config.App{
 		Logger:   zerolog.New(os.Stdout),
 		Settings: settings,

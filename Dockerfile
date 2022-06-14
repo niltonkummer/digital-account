@@ -1,32 +1,21 @@
+FROM heroku/heroku:20-build as build
 
-############################
-# STEP 1 build executable binary
-############################
+COPY . /app
+WORKDIR /app
 
-FROM golang:1.17 as builder
+# Setup buildpack
+RUN mkdir -p /tmp/buildpack/heroku/go /tmp/build_cache /tmp/env
+RUN curl https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/go.tgz | tar xz -C /tmp/buildpack/heroku/go
 
-WORKDIR /src
-COPY . .
+#Execute Buildpack
+RUN STACK=heroku-20 /tmp/buildpack/heroku/go/bin/compile /app /tmp/build_cache /tmp/env
 
-RUN CGO_ENABLED=1 GOOS=linux go build -o app -a -ldflags '-linkmode external -extldflags "-static"' .
+# Prepare final, minimal image
+FROM heroku/heroku:20
 
-
-############################
-# STEP 2 build a small image
-############################
-
-FROM scratch
-
-# Import from builder.
-
-# Copy our static executable.
-COPY --from=builder /src/app /app
-
-# Tests only
-COPY --from=builder /src/db /db
-COPY --from=builder /src/settings /settings
-
-# Port on which the service will be exposed.
-EXPOSE 80/tcp
-
-ENTRYPOINT ["/app"]
+COPY --from=build /app /app
+ENV HOME /app
+WORKDIR /app
+RUN useradd -m heroku
+USER heroku
+CMD /app/bin/digital-account

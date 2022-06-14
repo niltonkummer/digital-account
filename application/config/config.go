@@ -2,6 +2,7 @@ package config
 
 import (
 	"digital-account/application/repository"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -41,6 +42,7 @@ type Settings interface {
 	Int64(string) int64
 	Bool(string) bool
 	Strings(string) []string
+	Set(string, interface{})
 }
 
 type App struct {
@@ -65,6 +67,9 @@ func New(path string) (Settings, error) {
 	v := viper.New()
 
 	v.SetConfigFile(path)
+	v.AddConfigPath(".")
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
 
 	err := v.ReadInConfig()
 	if err != nil {
@@ -86,6 +91,10 @@ func (s *settings) get(key string) interface{} {
 	value := s.source.Get(key)
 
 	return value
+}
+
+func (s *settings) set(key string, value interface{}) {
+	s.source.Set(key, value)
 }
 
 func (s *settings) Get(key string) interface{} {
@@ -116,4 +125,8 @@ func (s *settings) Float64(key string) float64 {
 
 func (s *settings) Strings(key string) []string {
 	return cast.ToStringSlice(s.get(key))
+}
+
+func (s *settings) Set(key string, value interface{}) {
+	s.set(key, value)
 }

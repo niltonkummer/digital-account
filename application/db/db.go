@@ -7,6 +7,11 @@ import (
 )
 
 func Setup(db *gorm.DB) error {
-	return db.AutoMigrate(&models.Account{}, &models.User{}, &models.TransferLock{}, &models.Transfer{})
+	return db.AutoMigrate(
+		&models.Account{},
+		&models.User{},
+		&models.TransferLock{},
+		&models.Transfer{},
+	)
 
 }

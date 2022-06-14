@@ -2,7 +2,7 @@
 db:
   dialect: "./db/data.sqlite"
 container:
-  port: ":80"
+  port: ":5000"
 auth:
   timeout: "1h"
   key: "secret"

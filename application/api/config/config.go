@@ -59,9 +59,10 @@ func Routes(app *config.App) {
 		}
 	}
 
+	app.Logger.Info().Msgf("Starting HTTP on %v", app.Settings.String("container.port"))
 	err := router.Run(app.Settings.String("container.port"))
 	if err != nil {
-		log.Fatalln(err)
+		app.Logger.Fatal().Err(err).Msg("[HTTP LISTEN]")
 	}
 }
 
