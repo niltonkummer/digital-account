@@ -1,6 +1,6 @@
 ---
 db:
-  name: "./db/data.sqlite"
+  dialect: "./db/data.sqlite"
 container:
   port: ":80"
 auth:

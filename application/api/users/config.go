@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"digital-account/application/config"

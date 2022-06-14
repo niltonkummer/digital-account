@@ -1,12 +1,12 @@
 package accounts
 
 import (
-	"digital-account/application/api/common"
 	"digital-account/application/models"
-	"github.com/shopspring/decimal"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
+
+	"github.com/shopspring/decimal"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -28,16 +28,17 @@ func (a *Account) CreateHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := common.UserFromContext(c)
+	user, err := a.app.Repository.User().Create(c, req.Name, req.CPF, string(bcryptPass))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	account := &models.Account{
-		Secret:  string(bcryptPass),
 		Balance: decimal.Zero,
+		Secret:  string(bcryptPass),
 		UserID:  user.ID,
+		User:    user,
 	}
 
 	err = a.app.Repository.Account().Create(c.Request.Context(), account)
@@ -49,8 +50,8 @@ func (a *Account) CreateHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, account)
 }
 
-// GetHandler retrieves an account by id
-func (a *Account) GetHandler(c *gin.Context) {
+// BalanceHandler retrieves the balance from a account
+func (a *Account) BalanceHandler(c *gin.Context) {
 
 	idStr := c.Param("account_id")
 
@@ -70,7 +71,7 @@ func (a *Account) GetHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, account)
+	c.JSON(http.StatusOK, gin.H{"balance": account.Balance})
 }
 
 // ListHandler retrieves a list of accounts

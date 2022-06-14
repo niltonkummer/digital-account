@@ -2,6 +2,7 @@ package config
 
 import (
 	"digital-account/application/repository"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cast"
@@ -12,11 +13,13 @@ import (
 type Environment int
 
 const (
+	TestEnvironment    Environment = 0
 	DebugEnvironment   Environment = 1
 	ReleaseEnvironment Environment = 2
 )
 
 var envString = map[Environment]string{
+	TestEnvironment:    "test",
 	DebugEnvironment:   "debug",
 	ReleaseEnvironment: "release",
 }

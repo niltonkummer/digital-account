@@ -2,18 +2,24 @@ package repository
 
 type Repository interface {
 	Account() Account
-	Login() Login
+	User() User
+	Transfer() Transfer
 }
 
 type repo struct {
-	login   Login
-	account Account
+	user     User
+	account  Account
+	transfer Transfer
 }
 
 func (r repo) Account() Account {
 	return r.account
 }
 
-func (r repo) Login() Login {
-	return r.login
+func (r repo) User() User {
+	return r.user
+}
+
+func (r repo) Transfer() Transfer {
+	return r.transfer
 }

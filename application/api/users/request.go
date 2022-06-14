@@ -1,4 +1,4 @@
-package user
+package users
 
 type LoginRequest struct {
 	CPF    string `json:"cpf" binding:"required"`

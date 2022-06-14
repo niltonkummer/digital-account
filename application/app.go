@@ -1,9 +1,9 @@
 package application
 
 import (
-	"digital-account/application/api/setup"
+	apiConfig "digital-account/application/api/config"
 	"digital-account/application/config"
-	"digital-account/application/models"
+	"digital-account/application/db"
 	"digital-account/application/repository"
 	"flag"
 	"log"
@@ -19,26 +19,20 @@ import (
 )
 
 var (
-	port       = flag.String("port", ":8080", "server port")
 	configPath = flag.String("config", "settings/debug.yaml", "config file")
-	listener   []string
 	app        *config.App
 )
 
 type envType string
 
 const (
+	EnvTest    envType = "test"
 	EnvDebug   envType = "debug"
 	EnvRelease envType = "release"
 )
 
 func init() {
-
 	flag.Parse()
-	if *port != "" {
-		listener = []string{*port}
-	}
-
 }
 
 func setupDB(env config.Environment, dsn string) (*gorm.DB, error) {
@@ -56,19 +50,19 @@ func setupDB(env config.Environment, dsn string) (*gorm.DB, error) {
 		debug = true
 		dialect = sqlite.Open(dsn)
 	}
-	db, err := gorm.Open(dialect)
+	d, err := gorm.Open(dialect)
 	if err != nil {
 		return nil, err
 	}
 	if debug {
-		db = db.Debug()
+		d = d.Debug()
 	}
-	return db, nil
+	return d, nil
 }
 
 func setupRepository(a *config.App) error {
 
-	err := a.DB.AutoMigrate(&models.Account{}, &models.User{}, &models.Transfer{})
+	err := db.Setup(a.DB)
 	if err != nil {
 		return err
 	}
@@ -85,6 +79,8 @@ func Run() {
 		switch e {
 		case string(EnvRelease):
 			return config.ReleaseEnvironment
+		case string(EnvTest):
+			return config.TestEnvironment
 		default:
 			return config.DebugEnvironment
 		}
@@ -100,15 +96,14 @@ func Run() {
 	}
 
 	app.DB = func() *gorm.DB {
-		dbDialect := os.Getenv("DB")
-		if dbDialect == "" {
-			log.Fatal("$DB must be set")
-		}
-		db, err := setupDB(env, dbDialect)
+
+		dbDialect := app.Settings.String("db.dialect")
+
+		d, err := setupDB(env, dbDialect)
 		if err != nil {
 			app.Logger.Fatal().Err(err).Msg("setupDB")
 		}
-		return db
+		return d
 	}()
 
 	err = setupRepository(app)
@@ -116,6 +111,6 @@ func Run() {
 		app.Logger.Fatal().Err(err).Msg("setupRepository")
 	}
 
-	setup.ConfigRoutes(app)
+	apiConfig.Routes(app)
 
 }

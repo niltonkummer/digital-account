@@ -1,21 +1,23 @@
-package setup
+package config
 
 import (
 	"digital-account/application/api/accounts"
 	"digital-account/application/api/common"
-	"digital-account/application/api/user"
+	"digital-account/application/api/transfers"
+	"digital-account/application/api/users"
 	"digital-account/application/config"
 	"digital-account/application/models"
 	"strings"
 
 	"time"
 
+	"log"
+
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
-func ConfigRoutes(app *config.App) {
+func Routes(app *config.App) {
 
 	gin.SetMode(app.Environment.String())
 
@@ -23,26 +25,37 @@ func ConfigRoutes(app *config.App) {
 
 	app.Router = router
 
-	loginH := user.Config(app)
-	authMiddleware := ConfigAuth(app, loginH)
+	loginH := users.Config(app)
+	authMiddleware := Auth(app, loginH)
 
-	loginR := router.Group("/login")
-	{
-
-		loginR.POST("", authMiddleware.LoginHandler)
-	}
+	router.POST("/login", authMiddleware.LoginHandler)
 
 	api := router.Group("/api")
 	{
-
-		api.Use(authMiddleware.MiddlewareFunc())
-
-		accountsHandler := api.Group("/accounts")
+		apiAccounts := accounts.Config(app)
+		notAuthApi := api.Group("")
 		{
-			accHandler := accounts.Config(app)
-			accountsHandler.GET("", accHandler.ListHandler)
-			accountsHandler.GET("/:account_id/balance", accHandler.GetHandler)
-			accountsHandler.POST("", accHandler.CreateHandler)
+			accountsHandler := notAuthApi.Group("/accounts")
+			accountsHandler.POST("", apiAccounts.CreateHandler)
+		}
+
+		authApi := api.Group("")
+		{
+			authApi.Use(authMiddleware.MiddlewareFunc())
+
+			accountsHandler := authApi.Group("/accounts")
+			{
+				accountsHandler.GET("", apiAccounts.ListHandler)
+				accountsHandler.GET("/:account_id/balance", apiAccounts.BalanceHandler)
+
+			}
+
+			transfersHandler := authApi.Group("/transfers")
+			{
+				apiTransfers := transfers.Config(app)
+				transfersHandler.POST("", apiTransfers.CreateHandler)
+				transfersHandler.GET("", apiTransfers.ListHandler)
+			}
 		}
 	}
 
@@ -52,7 +65,7 @@ func ConfigRoutes(app *config.App) {
 	}
 }
 
-func ConfigAuth(app *config.App, l *user.User) *jwt.GinJWTMiddleware {
+func Auth(app *config.App, l *users.User) *jwt.GinJWTMiddleware {
 
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm: app.Settings.String("auth.realm"),
@@ -76,11 +89,8 @@ func ConfigAuth(app *config.App, l *user.User) *jwt.GinJWTMiddleware {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			return &models.User{
-				Model: models.Model{
-					ID: int64(claims[common.IdentityKey].(float64)),
-				},
-			}
+			user, _ := app.Repository.User().Get(c, int64(claims[common.IdentityKey].(float64)))
+			return user
 		},
 		Authenticator: l.Authenticator,
 		Authorizator:  l.Authorizer,

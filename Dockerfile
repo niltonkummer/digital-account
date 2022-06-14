@@ -24,6 +24,7 @@ COPY --from=builder /src/app /app
 
 # Tests only
 COPY --from=builder /src/db /db
+COPY --from=builder /src/settings /settings
 
 # Port on which the service will be exposed.
 EXPOSE 80/tcp

@@ -1,7 +1,8 @@
-package user
+package users
 
 import (
 	"digital-account/application/models"
+
 	ginJwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +16,7 @@ func (l *User) Authenticator(c *gin.Context) (interface{}, error) {
 		return nil, ginJwt.ErrMissingLoginValues
 	}
 
-	user, err := l.app.Repository.Login().Auth(c, req.CPF, "")
+	user, err := l.app.Repository.User().Auth(c, req.CPF)
 	if err != nil {
 		return nil, ginJwt.ErrFailedAuthentication
 	}
@@ -27,7 +28,7 @@ func (l *User) Authenticator(c *gin.Context) (interface{}, error) {
 	return user, nil
 }
 
-func (l *User) Authorizer(data interface{}, c *gin.Context) bool {
+func (l *User) Authorizer(data interface{}, _ *gin.Context) bool {
 
 	if _, ok := data.(*models.User); !ok {
 		return false

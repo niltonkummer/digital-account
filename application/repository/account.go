@@ -27,7 +27,7 @@ func (a *accountRepo) List(ctx context.Context) (accounts models.Accounts, err e
 
 	tx := a.DB.Scopes(Paginate(ctx))
 
-	res := tx.WithContext(ctx).Find(&accounts)
+	res := tx.WithContext(ctx).Joins("User").Find(&accounts)
 	err = res.Error
 
 	return

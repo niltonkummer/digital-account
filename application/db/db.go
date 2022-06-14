@@ -1,13 +1,12 @@
 package db
 
 import (
+	"digital-account/application/models"
+
 	"gorm.io/gorm"
 )
 
-func Config(dialect gorm.Dialector) (*gorm.DB, error) {
-	db, err := gorm.Open(dialect, &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
+func Setup(db *gorm.DB) error {
+	return db.AutoMigrate(&models.Account{}, &models.User{}, &models.TransferLock{}, &models.Transfer{})
+
 }
