@@ -25,9 +25,7 @@ func (a *accountRepo) Create(ctx context.Context, account *models.Account) error
 
 func (a *accountRepo) List(ctx context.Context) (accounts models.Accounts, err error) {
 
-	tx := a.DB.Scopes(Paginate(ctx))
-
-	res := tx.WithContext(ctx).Joins("User").Find(&accounts)
+	res := a.DB.WithContext(ctx).Scopes(Paginate(ctx)).Joins("User").Find(&accounts)
 	err = res.Error
 
 	return

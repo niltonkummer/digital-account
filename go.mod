@@ -3,9 +3,11 @@ module digital-account
 go 1.17
 
 require (
+	github.com/Rhymond/go-money v1.0.7
 	github.com/appleboy/gin-jwt/v2 v2.8.0
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/gin-gonic/gin v1.7.7
+	github.com/heroku/x v0.0.50
 	github.com/rs/zerolog v1.26.1
 	github.com/shopspring/decimal v1.2.0
 	github.com/spf13/cast v1.5.0

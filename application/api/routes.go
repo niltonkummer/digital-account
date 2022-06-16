@@ -1,9 +1,7 @@
-package config
+package api
 
 import (
-	"digital-account/application/api/accounts"
 	"digital-account/application/api/common"
-	"digital-account/application/api/transfers"
 	"digital-account/application/api/users"
 	"digital-account/application/config"
 	"digital-account/application/models"
@@ -17,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Routes(app *config.App) {
+func (a *API) Routes(app *config.App) {
 
 	gin.SetMode(app.Environment.String())
 
@@ -25,43 +23,12 @@ func Routes(app *config.App) {
 
 	app.Router = router
 
-	loginH := users.Config(app)
-	authMiddleware := Auth(app, loginH)
+	a.handlers(app, router)
 
-	router.POST("/login", authMiddleware.LoginHandler)
-
-	api := router.Group("/api")
-	{
-		apiAccounts := accounts.Config(app)
-		notAuthApi := api.Group("")
-		{
-			accountsHandler := notAuthApi.Group("/accounts")
-			accountsHandler.POST("", apiAccounts.CreateHandler)
-		}
-
-		authApi := api.Group("")
-		{
-			authApi.Use(authMiddleware.MiddlewareFunc())
-
-			accountsHandler := authApi.Group("/accounts")
-			{
-				accountsHandler.GET("", apiAccounts.ListHandler)
-				accountsHandler.GET("/:account_id/balance", apiAccounts.BalanceHandler)
-
-			}
-
-			transfersHandler := authApi.Group("/transfers")
-			{
-				apiTransfers := transfers.Config(app)
-				transfersHandler.POST("", apiTransfers.CreateHandler)
-				transfersHandler.GET("", apiTransfers.ListHandler)
-			}
-		}
-	}
-
+	app.Logger.Info().Msgf("Starting HTTP on %v", app.Settings.String("container.port"))
 	err := router.Run(app.Settings.String("container.port"))
 	if err != nil {
-		log.Fatalln(err)
+		app.Logger.Fatal().Err(err).Msg("[HTTP LISTEN]")
 	}
 }
 
@@ -114,4 +81,39 @@ func Auth(app *config.App, l *users.User) *jwt.GinJWTMiddleware {
 	}
 
 	return authMiddleware
+}
+
+func (a *API) handlers(app *config.App, router gin.IRouter) {
+
+	authMiddleware := Auth(app, a.UserService)
+
+	router.POST("/login", authMiddleware.LoginHandler)
+
+	api := router.Group("/api")
+	{
+		notAuthApi := api.Group("")
+		{
+			accountsHandler := notAuthApi.Group("/accounts")
+			accountsHandler.POST("", a.AccountsService.CreateHandler)
+		}
+
+		authApi := api.Group("")
+		{
+			authApi.Use(authMiddleware.MiddlewareFunc())
+
+			accountsHandler := authApi.Group("/accounts")
+			{
+				accountsHandler.GET("", a.AccountsService.ListHandler)
+				accountsHandler.GET("/:account_id/balance", a.AccountsService.BalanceHandler)
+
+			}
+
+			transfersHandler := authApi.Group("/transfers")
+			{
+
+				transfersHandler.POST("", a.TransfersService.CreateHandler)
+				transfersHandler.GET("", a.TransfersService.ListHandler)
+			}
+		}
+	}
 }

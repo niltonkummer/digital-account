@@ -12,7 +12,7 @@ import (
 func (a *Transfers) CreateHandler(c *gin.Context) {
 
 	req := TransferRequest{}
-	err := c.BindJSON(&req)
+	err := c.MustBindWith(&req, &req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -29,7 +29,10 @@ func (a *Transfers) CreateHandler(c *gin.Context) {
 		return
 	}
 
-	res, err := a.app.Repository.Transfer().Create(
+	//hundred := decimal.New(100, 0)
+	// req.Amount = decimal.NewFromInt(req.Amount.Mul(hundred).IntPart()).Div(hundred)
+
+	res, err := a.Repository().Transfer().Create(
 		c,
 		&models.Transfer{
 			AccountOriginID:      user.Account.ID,
@@ -48,7 +51,7 @@ func (a *Transfers) CreateHandler(c *gin.Context) {
 // ListHandler retrieves a list of transfers
 func (a *Transfers) ListHandler(c *gin.Context) {
 
-	accounts, err := a.app.Repository.Transfer().List(c)
+	accounts, err := a.Repository().Transfer().List(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return

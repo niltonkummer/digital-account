@@ -1,6 +1,6 @@
 ---
 db:
-  dialect: "./db/data.sqlite"
+  dialect: DB_DIALECT
 container:
   port: ":5000"
 auth:

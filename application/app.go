@@ -1,7 +1,7 @@
 package application
 
 import (
-	apiConfig "digital-account/application/api/config"
+	apiConfig "digital-account/application/api"
 	"digital-account/application/config"
 	"digital-account/application/db"
 	"digital-account/application/repository"
@@ -90,6 +90,13 @@ func Run() {
 	if err != nil {
 		log.Fatal("could not load settings: ", err)
 	}
+
+	// HEROKU CONFIG
+	port := os.Getenv("PORT")
+	if port != "" {
+		settings.Set("container.port", ":"+port)
+	}
+
 	app = &config.App{
 		Logger:   zerolog.New(os.Stdout),
 		Settings: settings,
@@ -111,6 +118,6 @@ func Run() {
 		app.Logger.Fatal().Err(err).Msg("setupRepository")
 	}
 
-	apiConfig.Routes(app)
+	apiConfig.SetupRoutes(app)
 
 }

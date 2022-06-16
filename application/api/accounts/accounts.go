@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/asaskevich/govalidator"
@@ -28,22 +27,21 @@ func (a *Account) CreateHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := a.app.Repository.User().Create(c, req.Name, req.CPF, string(bcryptPass))
+	user, err := a.Repository().User().Create(c, req.Name, req.CPF, string(bcryptPass))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	account := &models.Account{
-		Balance: decimal.Zero,
-		Secret:  string(bcryptPass),
-		UserID:  user.ID,
-		User:    user,
+		Secret: string(bcryptPass),
+		UserID: user.ID,
+		User:   user,
 	}
 
-	err = a.app.Repository.Account().Create(c.Request.Context(), account)
+	err = a.Repository().Account().Create(c.Request.Context(), account)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -60,12 +58,9 @@ func (a *Account) BalanceHandler(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-	account, errAcc := a.app.Repository.Account().Get(c.Request.Context(), id)
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+
+	account, errAcc := a.Repository().Account().Get(c.Request.Context(), id)
 	if errAcc != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errAcc})
 		return
@@ -77,7 +72,7 @@ func (a *Account) BalanceHandler(c *gin.Context) {
 // ListHandler retrieves a list of accounts
 func (a *Account) ListHandler(c *gin.Context) {
 
-	accounts, err := a.app.Repository.Account().List(c)
+	accounts, err := a.Repository().Account().List(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return

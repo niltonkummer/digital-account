@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var repoTest = func() Account {
+var AccountRepoTest = func() Account {
 
 	d, _ := gorm.Open(sqlite.Open("file:memdb1?mode=memory&cache=shared"))
 	_ = db.Setup(d)
@@ -142,7 +142,7 @@ func Test_accountRepo_Create(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			if err := repoTest().Create(tt.args.ctx, tt.args.account); (err != nil) != tt.wantErr {
+			if err := AccountRepoTest().Create(tt.args.ctx, tt.args.account); (err != nil) != tt.wantErr {
 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -171,7 +171,7 @@ func Test_accountRepo_Get(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			account, err := repoTest().Get(tt.args.ctx, tt.args.accountID)
+			account, err := AccountRepoTest().Get(tt.args.ctx, tt.args.accountID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -184,7 +184,7 @@ func Test_accountRepo_Get(t *testing.T) {
 
 func Test_accountRepo_List(t *testing.T) {
 
-	tr := repoTest()
+	tr := AccountRepoTest()
 	for _, acc := range resultListAccounts {
 		_ = tr.Create(context.TODO(), acc)
 	}

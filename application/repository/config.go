@@ -6,7 +6,7 @@ import (
 
 func Config(db *gorm.DB) Repository {
 	return &repo{
-		user:     CreateLoginRepository(db),
+		user:     CreateUserRepository(db),
 		account:  CreateAccountRepository(db),
 		transfer: CreateTransferRepository(db),
 	}
