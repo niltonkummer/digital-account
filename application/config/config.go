@@ -29,38 +29,13 @@ func (e Environment) String() string {
 	return envString[e]
 }
 
-type Config struct {
-	HttpListen string
-	DBDialect  gorm.Dialector
-}
-
-type Settings interface {
-	Get(string) interface{}
-	String(string) string
-	Float64(string) float64
-	Int(string) int
-	Int64(string) int64
-	Bool(string) bool
-	Strings(string) []string
-	Set(string, interface{})
-}
-
 type App struct {
-
-	// Config
-	conf *Config
-
-	// App
-	Router gin.IRouter
-	DB     *gorm.DB
-	Logger zerolog.Logger
-
+	Router      gin.IRouter
+	DB          *gorm.DB
+	Logger      zerolog.Logger
 	Environment Environment
-
-	Settings Settings
-
-	// Repository
-	Repository repository.Repository
+	Settings    Settings
+	Repository  repository.Repository
 }
 
 func New(path string) (Settings, error) {
@@ -81,6 +56,17 @@ func New(path string) (Settings, error) {
 	}
 
 	return s, nil
+}
+
+type Settings interface {
+	Get(string) interface{}
+	String(string) string
+	Float64(string) float64
+	Int(string) int
+	Int64(string) int64
+	Bool(string) bool
+	Strings(string) []string
+	Set(string, interface{})
 }
 
 type settings struct {

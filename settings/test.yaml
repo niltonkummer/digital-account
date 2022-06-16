@@ -1,0 +1,9 @@
+---
+db:
+  name: "file:memdb1?mode=memory&cache=shared"
+container:
+  port: ":80"
+auth:
+  timeout: "1h"
+  key: "secret"
+  realm: "domain jwt"

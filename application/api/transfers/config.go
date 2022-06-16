@@ -1,15 +1,15 @@
 package transfers
 
 import (
-	"digital-account/application/config"
+	"digital-account/application/api/handler"
 )
 
 type Transfers struct {
-	app *config.App
+	handler.Handler
 }
 
-func Config(app *config.App) *Transfers {
+func Config(h handler.Handler) *Transfers {
 	return &Transfers{
-		app: app,
+		Handler: h,
 	}
 }

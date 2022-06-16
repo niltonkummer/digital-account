@@ -22,40 +22,37 @@ type transferRepo struct {
 func (a *transferRepo) Create(ctx context.Context, transfer *models.Transfer) (*models.Transfer, error) {
 	err := a.DB.Transaction(func(tx *gorm.DB) (err error) {
 
-		transferLock := models.TransferLock{
+		transferLock := &models.TransferLock{
 			AccountOriginID:      transfer.AccountOriginID,
 			AccountDestinationID: transfer.AccountDestinationID,
 		}
 
 		res := tx.WithContext(ctx).
-			Create(&transferLock)
+			Create(transferLock)
 		if res.Error != nil {
 			return res.Error
 		}
-		defer func() {
+		defer func(tx *gorm.DB, transferLock *models.TransferLock, transfer *models.Transfer) {
 			res := tx.WithContext(ctx).
 				Where("account_origin_id", transfer.AccountOriginID).
 				Where("account_destination_id", transfer.AccountDestinationID).
 				Delete(&transferLock)
 			err = res.Error
-		}()
+		}(tx, transferLock, transfer)
 
 		var origin models.Account
 		res = tx.WithContext(ctx).
-			Find(&origin, transfer.AccountOriginID)
+			First(&origin, transfer.AccountOriginID)
 		if res.Error != nil {
 			return res.Error
 		}
 
 		var destination models.Account
 		res = tx.WithContext(ctx).
-			Find(&destination, transfer.AccountDestinationID)
+			First(&destination, transfer.AccountDestinationID)
 		if res.Error != nil {
 			return res.Error
 		}
-
-		transfer.AccountOrigin = origin
-		transfer.AccountDestination = destination
 
 		res = tx.WithContext(ctx).
 			Model(&transfer.AccountOrigin).
@@ -78,7 +75,8 @@ func (a *transferRepo) Create(ctx context.Context, transfer *models.Transfer) (*
 		}
 
 		res = tx.WithContext(ctx).
-			Create(transfer)
+			Clauses(clause.Returning{}).
+			Create(&transfer)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -91,12 +89,8 @@ func (a *transferRepo) Create(ctx context.Context, transfer *models.Transfer) (*
 // List retrieves a list of transfers in accord with filter
 func (a *transferRepo) List(ctx context.Context) (transfer models.Transfers, err error) {
 
-	tx := a.DB.Scopes(Paginate(ctx))
-
-	res := tx.WithContext(ctx).
-		Find(&transfer)
+	res := a.DB.WithContext(ctx).Scopes(Paginate(ctx)).Find(&transfer)
 	err = res.Error
-
 	return
 }
 

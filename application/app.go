@@ -1,7 +1,7 @@
 package application
 
 import (
-	apiConfig "digital-account/application/api/config"
+	apiConfig "digital-account/application/api"
 	"digital-account/application/config"
 	"digital-account/application/db"
 	"digital-account/application/repository"
@@ -118,6 +118,6 @@ func Run() {
 		app.Logger.Fatal().Err(err).Msg("setupRepository")
 	}
 
-	apiConfig.Routes(app)
+	apiConfig.SetupRoutes(app)
 
 }

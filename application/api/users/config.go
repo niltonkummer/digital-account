@@ -1,15 +1,15 @@
 package users
 
 import (
-	"digital-account/application/config"
+	"digital-account/application/api/handler"
 )
 
 type User struct {
-	app *config.App
+	handler.Handler
 }
 
-func Config(app *config.App) *User {
+func Config(h handler.Handler) *User {
 	return &User{
-		app: app,
+		Handler: h,
 	}
 }

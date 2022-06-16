@@ -16,7 +16,7 @@ func (l *User) Authenticator(c *gin.Context) (interface{}, error) {
 		return nil, ginJwt.ErrMissingLoginValues
 	}
 
-	user, err := l.app.Repository.User().Auth(c, req.CPF)
+	user, err := l.Repository().User().ByCPF(c, req.CPF)
 	if err != nil {
 		return nil, ginJwt.ErrFailedAuthentication
 	}

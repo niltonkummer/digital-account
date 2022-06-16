@@ -1,0 +1,9 @@
+---
+db:
+  dialect: DB_DIALECT
+container:
+  port: ":5000"
+auth:
+  timeout: "1h"
+  key: "secret"
+  realm: "domain jwt"
