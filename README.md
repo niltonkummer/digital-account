@@ -87,15 +87,44 @@ curl -POST https://digital-banking.herokuapp.com/api/accounts -X POST --data '{"
 ### Transfers
 
 `POST /api/transfers`
+
+`Request`
 ```shell
---data '{"account_destination_id":2, "amount":102.10}'
+curl https://digital-banking.herokuapp.com/api/transfers -X POST -H "Authorization: Bearer ${TOKEN}" --data '{"account_destination_id":4, "amount":1}'
 ```
 
+`Response`
+```json
+{"id":10,"account_origin_id":1,"account_destination_id":4,"amount":"1"}%
+```
+
+`GET /api/transfers`
+
+`Request`
+```shell
+curl https://digital-banking.herokuapp.com/api/transfers -H "Authorization: Bearer ${TOKEN}" 
+```
+
+`Response`
+```json
+[
+  {"id":1,"account_origin_id":1,"account_destination_id":4,"amount":"100"},
+  {"id":2,"account_origin_id":1,"account_destination_id":4,"amount":"100.19"},
+  {"id":3,"account_origin_id":1,"account_destination_id":4,"amount":"100.19"},
+  {"id":4,"account_origin_id":1,"account_destination_id":4,"amount":"1"},
+  {"id":5,"account_origin_id":1,"account_destination_id":4,"amount":"1"},
+  {"id":6,"account_origin_id":1,"account_destination_id":4,"amount":"1"},
+  {"id":7,"account_origin_id":1,"account_destination_id":4,"amount":"0.38"},
+  {"id":8,"account_origin_id":1,"account_destination_id":4,"amount":"1"},
+  {"id":9,"account_origin_id":1,"account_destination_id":4,"amount":"1"},
+  {"id":10,"account_origin_id":1,"account_destination_id":4,"amount":"1"}
+]
+```
 
 
 ## Author
 - Nilton Henrique Kummer - [niltonkummer](https://github.com/niltonkummer)
 
 ## License
-Copyright © 2020 [niltonkummer](https://github.com/niltonkummer).
+Copyright © 2022 [niltonkummer](https://github.com/niltonkummer).
 This project is [MIT](LICENSE) licensed.

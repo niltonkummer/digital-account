@@ -51,7 +51,13 @@ func (a *Transfers) CreateHandler(c *gin.Context) {
 // ListHandler retrieves a list of transfers
 func (a *Transfers) ListHandler(c *gin.Context) {
 
-	accounts, err := a.Repository().Transfer().List(c)
+	user, err := common.UserFromContext(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	accounts, err := a.Repository().Transfer().List(c, user.ID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return

@@ -11,7 +11,7 @@ import (
 
 type Transfer interface {
 	Create(ctx context.Context, transfer *models.Transfer) (*models.Transfer, error)
-	List(ctx context.Context) (models.Transfers, error)
+	List(ctx context.Context, id int64) (models.Transfers, error)
 }
 
 type transferRepo struct {
@@ -87,9 +87,9 @@ func (a *transferRepo) Create(ctx context.Context, transfer *models.Transfer) (*
 }
 
 // List retrieves a list of transfers in accord with filter
-func (a *transferRepo) List(ctx context.Context) (transfer models.Transfers, err error) {
+func (a *transferRepo) List(ctx context.Context, id int64) (transfer models.Transfers, err error) {
 
-	res := a.DB.WithContext(ctx).Scopes(Paginate(ctx)).Find(&transfer)
+	res := a.DB.WithContext(ctx).Scopes(Paginate(ctx)).Where("account_origin_id = ?", id).Find(&transfer)
 	err = res.Error
 	return
 }
