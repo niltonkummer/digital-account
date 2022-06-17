@@ -79,11 +79,6 @@ curl https://digital-banking.herokuapp.com/api/accounts/1/balance -H "Authorizat
 curl -POST https://digital-banking.herokuapp.com/api/accounts -X POST --data '{"cpf":"12345678910","secret":"12345","name":"Carlos"}' -s -o /dev/stdout  
 ```
 
-`Response`
-```json
-{"balance":"-91821673.14"}% 
-```
-
 ### Transfers
 
 `POST /api/transfers`
